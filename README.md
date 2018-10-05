@@ -19,19 +19,14 @@ A trait `SwaggerRoutes` is generated where which method is a route/method combin
 
 Then you can use `SwaggerRouteHelper` to turn this into a `HttpRoutes[IO]` and run it (or add middleware etc)like you would any other, for example:
 ```
-class MyApi extends IOApp with Http4sDsl[IO] {
-  override def run(args: List[String]): IO[ExitCode] = for {
-    myService <- Stream(new MyService())
-    routes = SwaggerRouteHelper.makeRoutes(MyRoutesObject(myService))
-    _ <- BlazeBuilder[IO]
-      .bindHttp(8080)
-      .mountService(routes, "/")
-      .serve
-      .compile
-      .drain
-  } yield ExitCode.Error
+object Main extends IOApp {
+  private final val PORT: Int = 8080
+  override def run(args: List[String]): IO[ExitCode] = {
+    val service = new MyService()
+    val routes = SwaggerRouteHelper.makeRoutes(MyRoutesObject(myService))
+    BlazeBuilder[IO].bindHttp(PORT, "0.0.0.0").mountService(routes, "/").serve.compile.drain.as(ExitCode.Error)
+  }
 }
-
 ```
 
 ## Features
